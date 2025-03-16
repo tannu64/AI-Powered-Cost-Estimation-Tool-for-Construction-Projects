@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction Cost Estimator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            background-color: #f8f9fa;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        .result-card {
+            display: none;
+        }
+        .header-container {
+            background-color: #343a40;
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-container text-center">
+            <h1>AI-Powered Construction Cost Estimator</h1>
+            <p class="lead">Get accurate cost estimates for your construction projects using machine learning</p>
+        </div>
+
+        {% if not model_loaded %}
+        <div class="alert alert-warning" role="alert">
+            <strong>Warning:</strong> Model not loaded. Please train the model first by running the training script.
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Project Details</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="estimationForm">
+                            <div class="form-group">
+                                <label for="building_type">Building Type</label>
+                                <select class="form-control" id="building_type" name="building_type" required>
+                                    <option value="">Select Building Type</option>
+                                    <option value="Residential">Residential</option>
+                                    <option value="Commercial">Commercial</option>
+                                    <option value="Industrial">Industrial</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="area_sqm">Area (sqm)</label>
+                                <input type="number" class="form-control" id="area_sqm" name="area_sqm" min="10" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="floors">Number of Floors</label>
+                                <input type="number" class="form-control" id="floors" name="floors" min="1" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="location">Location</label>
+                                <select class="form-control" id="location" name="location" required>
+                                    <option value="">Select Location</option>
+                                    <option value="Urban">Urban</option>
+                                    <option value="Suburban">Suburban</option>
+                                    <option value="Rural">Rural</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="quality_grade">Quality Grade</label>
+                                <select class="form-control" id="quality_grade" name="quality_grade" required>
+                                    <option value="">Select Quality Grade</option>
+                                    <option value="Standard">Standard</option>
+                                    <option value="Premium">Premium</option>
+                                    <option value="Luxury">Luxury</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">Additional Features</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="foundation_type">Foundation Type</label>
+                                <select class="form-control" id="foundation_type" name="foundation_type" required>
+                                    <option value="">Select Foundation Type</option>
+                                    <option value="Concrete">Concrete</option>
+                                    <option value="Pile">Pile</option>
+                                    <option value="Slab">Slab</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="roof_type">Roof Type</label>
+                                <select class="form-control" id="roof_type" name="roof_type" required>
+                                    <option value="">Select Roof Type</option>
+                                    <option value="Flat">Flat</option>
+                                    <option value="Pitched">Pitched</option>
+                                    <option value="Dome">Dome</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input type="checkbox" class="form-check-input" id="has_basement" name="has_basement" value="1">
+                                <label class="form-check-label" for="has_basement">Has Basement</label>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input type="checkbox" class="form-check-input" id="has_elevator" name="has_elevator" value="1">
+                                <label class="form-check-label" for="has_elevator">Has Elevator</label>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input type="checkbox" class="form-check-input" id="has_parking" name="has_parking" value="1">
+                                <label class="form-check-label" for="has_parking">Has Parking</label>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="labor_rate">Labor Rate ($/hour)</label>
+                                <input type="number" class="form-control" id="labor_rate" name="labor_rate" min="10" max="100" step="0.1" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="material_cost_index">Material Cost Index (0.8-1.5)</label>
+                                <input type="number" class="form-control" id="material_cost_index" name="material_cost_index" min="0.8" max="1.5" step="0.01" required>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-lg mt-3 w-100" {% if not model_loaded %}disabled{% endif %}>
+                                Calculate Estimate
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card result-card mt-4" id="resultCard">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">Cost Estimate Result</h4>
+                    </div>
+                    <div class="card-body text-center">
+                        <h2 id="estimateResult"></h2>
+                        <p class="text-muted">This is an AI-generated estimate based on the provided information</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="mt-5 text-center text-muted">
+            <p>AI-Powered Cost Estimation Tool for Construction Projects</p>
+        </footer>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Set default values for checkboxes
+            $('#has_basement').val(0);
+            $('#has_elevator').val(0);
+            $('#has_parking').val(0);
+            
+            // Update checkbox values when clicked
+            $('#has_basement').change(function() {
+                $(this).val(this.checked ? 1 : 0);
+            });
+            
+            $('#has_elevator').change(function() {
+                $(this).val(this.checked ? 1 : 0);
+            });
+            
+            $('#has_parking').change(function() {
+                $(this).val(this.checked ? 1 : 0);
+            });
+            
+            // Form submission
+            $('#estimationForm').submit(function(e) {
+                e.preventDefault();
+                
+                // Show loading state
+                $('button[type="submit"]').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Calculating...');
+                $('button[type="submit"]').prop('disabled', true);
+                
+                // Get form data
+                var formData = $(this).serialize();
+                
+                // Send AJAX request
+                $.ajax({
+                    url: '/predict',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        // Display result
+                        $('#estimateResult').text(response.formatted_prediction);
+                        $('#resultCard').fadeIn();
+                        
+                        // Reset button
+                        $('button[type="submit"]').html('Calculate Estimate');
+                        $('button[type="submit"]').prop('disabled', false);
+                        
+                        // Scroll to result
+                        $('html, body').animate({
+                            scrollTop: $("#resultCard").offset().top
+                        }, 500);
+                    },
+                    error: function(xhr) {
+                        // Handle error
+                        var errorMessage = 'An error occurred. Please try again.';
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMessage = xhr.responseJSON.error;
+                        }
+                        
+                        alert(errorMessage);
+                        
+                        // Reset button
+                        $('button[type="submit"]').html('Calculate Estimate');
+                        $('button[type="submit"]').prop('disabled', false);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
